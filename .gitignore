@@ -102,3 +102,7 @@ ENV/
 
 # VSCode
 .vscode/
+
+# Training data
+train.7z
+trainingData/
