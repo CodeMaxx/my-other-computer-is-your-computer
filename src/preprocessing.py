@@ -52,7 +52,7 @@ class Preprocessing():
 	def __init__(self, mode):
 		self.mode = mode
 		if mode:
-			self.samples_base_dir = '../../../trainingSamples'
+			self.samples_base_dir = '../../../trainingSamples/'
 			self.train_files = list(
 				set([i[:20] for i in os.listdir(self.samples_base_dir)]))
 			self.feature_dump = "../../../feature-dump/"
