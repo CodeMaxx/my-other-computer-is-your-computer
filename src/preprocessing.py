@@ -29,6 +29,7 @@ from collections import defaultdict
 import pandas as pd
 import numpy as np
 import os
+import sys
 from sklearn.preprocessing import MinMaxScaler
 import pickle
 import concurrent.futures
@@ -45,26 +46,36 @@ from sklearn.model_selection import GridSearchCV
 #######################################################################
 
 class Preprocessing():
-	SAMPLES_BASE_DIR = '../samples/'
-	TRAIN_FILES = list(set([i[:20] for i in os.listdir(SAMPLES_BASE_DIR)]))[:2]
-
 	INSTRN_BIGRAM_THRESHOLD = 20
 	BYTE_BIGRAM_THRESHOLD = 100
 
-	def __init__(self):
-		pass
+	def __init__(self, mode):
+		self.mode = mode
+		if mode:
+			self.samples_base_dir = '../../../trainingSamples/'
+			self.train_files = list(
+				set([i[:20] for i in os.listdir(self.samples_base_dir)]))
+			self.feature_dump = "../../../feature-dump/"
+			self.trainingLabels = "../updatedTrainingLabels.csv"
+		else:
+			self.samples_base_dir = '../samples/'
+			self.train_files = list(
+				set([i[:20] for i in os.listdir(self.samples_base_dir)]))[:2]
+			self.feature_dump = "../feature-dump/"
+			self.trainingLabels = "../trainLabels.csv"
+
 
 	def get_processed_data(self):
 		with concurrent.futures.ProcessPoolExecutor() as executor:
 			train_data_points_ = pd.DataFrame()
-			for features in executor.map(self._extract_features, Preprocessing.TRAIN_FILES):
+			for features in executor.map(self._extract_features, self.train_files):
 				train_data_points_ = pd.concat([train_data_points_, features], axis=0)
 			train_data_points_.fillna(0, inplace=True)
 			train_data_labels_ = self._get_labels()
 		return (train_data_points_, train_data_labels_)
 
 	def _getPixelIntensity(self, filename):
-		f = open(Preprocessing.SAMPLES_BASE_DIR + filename)
+		f = open(self.samples_base_dir + filename)
 		imageArray = array.array("B")
 		imageArray = np.fromfile(f, dtype='B')
 		imageArray = imageArray[-1000:]
@@ -87,8 +98,8 @@ class Preprocessing():
 		segments = defaultdict(int)
 
 		# Check if instrunction n-gram and segment size already there
-		if(os.path.isfile("../feature-dump/"+filename+"_INSTRN_UNIGRAM.pkl")!=True):
-			with open(Preprocessing.SAMPLES_BASE_DIR + filename + ".asm", 'r', encoding='Latin-1') as file:
+		if(os.path.isfile(self.feature_dump + filename + "_INSTRN_UNIGRAM.pkl")!=True):
+			with open(self.samples_base_dir + filename + ".asm", 'r', encoding='Latin-1') as file:
 				prev, now = 0, 0
 				for line in file:
 					# Filtering lines
@@ -112,18 +123,18 @@ class Preprocessing():
 			instrn_bigram = defaultdict(int, {k:v for k,v in instrn_bigram.items() \
 							if v > Preprocessing.INSTRN_BIGRAM_THRESHOLD and k[0] != 0})
 
-			joblib.dump(instrn_unigram,"../feature-dump/"+filename+"_INSTRN_UNIGRAM.pkl")
-			joblib.dump(instrn_bigram,"../feature-dump/"+filename+"_INSTRN_BIGRAM.pkl")
-			joblib.dump(segments,"../feature-dump/"+filename+"_SEGMENT_SIZE.pkl")
+			joblib.dump(instrn_unigram,self.feature_dump + filename+"_INSTRN_UNIGRAM.pkl")
+			joblib.dump(instrn_bigram,self.feature_dump + filename+"_INSTRN_BIGRAM.pkl")
+			joblib.dump(segments,self.feature_dump + filename+"_SEGMENT_SIZE.pkl")
 
 		else:
-			segments = joblib.load("../feature-dump/"+filename+"_SEGMENT_SIZE.pkl")
-			instrn_unigram = joblib.load("../feature-dump/"+filename+"_INSTRN_UNIGRAM.pkl")
-			instrn_bigram = joblib.load("../feature-dump/"+filename+"_INSTRN_BIGRAM.pkl")
+			segments = joblib.load(self.feature_dump + filename+"_SEGMENT_SIZE.pkl")
+			instrn_unigram = joblib.load(self.feature_dump + filename+"_INSTRN_UNIGRAM.pkl")
+			instrn_bigram = joblib.load(self.feature_dump + filename+"_INSTRN_BIGRAM.pkl")
 
 		# Check if byte n-gram already there
-		if(os.path.isfile("../feature-dump/"+filename+"_BYTE_UNIGRAM.pkl")!=True):
-			with open(Preprocessing.SAMPLES_BASE_DIR + filename + ".bytes", 'r', encoding='Latin-1') as file:
+		if(os.path.isfile(self.feature_dump + filename+"_BYTE_UNIGRAM.pkl")!=True):
+			with open(self.samples_base_dir + filename + ".bytes", 'r', encoding='Latin-1') as file:
 				prev, now = 0, 0
 				for line in file:
 					try:
@@ -141,21 +152,21 @@ class Preprocessing():
 			byte_bigram = defaultdict(int, {k:v for k,v in byte_bigram.items() \
 											if v > Preprocessing.BYTE_BIGRAM_THRESHOLD and k[0] != 0})
 
-			joblib.dump(byte_unigram,"../feature-dump/"+filename+"_BYTE_UNIGRAM.pkl")
-			joblib.dump(byte_bigram,"../feature-dump/"+filename+"_BYTE_BIGRAM.pkl")
+			joblib.dump(byte_unigram,self.feature_dump + filename+"_BYTE_UNIGRAM.pkl")
+			joblib.dump(byte_bigram,self.feature_dump + filename+"_BYTE_BIGRAM.pkl")
 
 		else:
-			byte_unigram = joblib.load("../feature-dump/"+filename+"_BYTE_UNIGRAM.pkl")
-			byte_bigram = joblib.load("../feature-dump/"+filename+"_BYTE_BIGRAM.pkl")
+			byte_unigram = joblib.load(self.feature_dump + filename+"_BYTE_UNIGRAM.pkl")
+			byte_bigram = joblib.load(self.feature_dump + filename+"_BYTE_BIGRAM.pkl")
 
 
 		# Check if pixel Intensity feature already there
-		if(os.path.isfile("../feature-dump/"+filename+"_PIXEL_INTENSITY.pkl")!=True):
+		if(os.path.isfile(self.feature_dump + filename+"_PIXEL_INTENSITY.pkl")!=True):
 			pixelIntensity = self._getPixelIntensity(filename + ".asm")
 			pixelIntensity = defaultdict(int, {"Pixel" + str(k): pixelIntensity[k] for k in range(1000)})
-			joblib.dump(pixelIntensity,"../feature-dump/"+filename+"_PIXEL_INTENSITY.pkl")
+			joblib.dump(pixelIntensity,self.feature_dump + filename+"_PIXEL_INTENSITY.pkl")
 		else:
-			pixelIntensity = joblib.load("../feature-dump/"+filename+"_PIXEL_INTENSITY.pkl")
+			pixelIntensity = joblib.load(self.feature_dump + filename+"_PIXEL_INTENSITY.pkl")
 
 
 		all_features = copy(segments)
@@ -166,13 +177,13 @@ class Preprocessing():
 		all_features.update(pixelIntensity)
 		p = pd.DataFrame(all_features, index=[filename,])
 
-		print(filename)
+		print(filename + ' done')
 		return p 
 
 	def _get_labels(self):
-		trainLabels = pd.read_csv("../trainLabels.csv", index_col=0)
+		trainLabels = pd.read_csv(self.trainingLabels, index_col=0)
 		trainLabels = trainLabels['Class']
-		trainLabels = trainLabels.loc[Preprocessing.TRAIN_FILES]
+		trainLabels = trainLabels.loc[self.train_files]
 		return trainLabels
 
 	def scaler(self, train_data_):
@@ -181,22 +192,25 @@ class Preprocessing():
 		return scaled_train_data_
 
 
-print("Starting Experiment...")
-print("Extracting Features...")
+def main():
+	print("Starting Experiment...")
+	print("Extracting Features...")
+	p = Preprocessing(int(sys.argv[1]))
 
-p = Preprocessing()
+	X_train, y_train = p.get_processed_data()
 
-X_train, y_train = p.get_processed_data()
+	print("Feature extraction complete")
 
-print("Feature extraction complete")
+	print("Normalising...")
 
-print("Normalising...")
+	X_train = p.scaler(X_train)
 
-X_train = p.scaler(X_train)
+	print("Data points normalised")
 
-print("Data points normalised")
+	print("Training Classifiers...")
 
-print("Training Classifiers...")
+if __name__ == "__main__":
+	main()
 
 # models = SupervisedModels(X_train, y_train)
 # models.train_all()
