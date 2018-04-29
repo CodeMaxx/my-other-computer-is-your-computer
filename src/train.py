@@ -79,13 +79,37 @@ class SupervisedModels():
         self.svc = svc
 
     def trainXGBC(self):
-        raise NotImplementedError
+        param_grid = dict()
+
+        _xgbc = XGBClassifier(random_state=42)
+        xgbc = GridSearchCV(_xgbc, param_grid, cv=5, scoring='accuracy')
+
+        xgbc.fit(self.X, self.y)
+        joblib.dump(xgbc, 'xgbc.pkl')
+
+        self.xgbc = xgbc
 
     def trainLogisticRegression(self):
-        raise NotImplementedError
+        param_grid = dict()
+
+        _lr = LogisticRegression(random_state=42)
+        lr = GridSearchCV(_lr, param_grid, cv=5, scoring='accuracy')
+
+        lr.fit(self.X, self.y)
+        joblib.dump(lr, 'lr.pkl')
+
+        self.lr = lr
 
     def trainKNN(self):
-        raise NotImplementedError
+        param_grid = dict()
+
+        _knn = KNeighborsClassifier(random_state=42)
+        knn = GridSearchCV(_knn, param_grid, cv=5, scoring='accuracy')
+
+        knn.fit(self.X, self.y)
+        joblib.dump(knn, 'knn.pkl')
+
+        self.knn = knn
 
     def train_RandomForest(self):
         # Hyperparameter values
@@ -103,9 +127,26 @@ class SupervisedModels():
         joblib.dump(rfc, 'random_forest.pkl')
 
         self.rfc = rfc
-
+    
     def trainNeuralNetwork(self):
-        raise NotImplementedError
+        # Hyperparameter values
+        hidden_layer_sizes_vals = [
+            (8, 4), (8, 8), (16, 8), (16, 16), (32, 16), (32, 32), (64, 64), (96, 96)]
+        max_iter_vals = [5, 10, 20, 50, 100, 200]
+
+        param_grid = dict(
+            hidden_layer_sizes=hidden_layer_sizes_vals, max_iter=max_iter_vals)
+
+        # Classifier
+        _nn = MLPClassifier(solver='lbfgs', alpha=1e-5,
+                            hidden_layer_sizes=(64, 2), random_state=1)
+        nn = GridSearchCV(_nn, param_grid, cv=5, scoring='accuracy')
+
+        # Fitting data
+        nn.fit(self.X, self.y)
+        # Create pickle file for model
+        joblib.dump(nn, 'model4.pkl')
+        self.nn = nn
 
 
 class SemiSupervisedModels():
