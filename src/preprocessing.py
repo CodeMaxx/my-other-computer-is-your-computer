@@ -1,9 +1,3 @@
-
-# coding: utf-8
-
-# In[10]:
-
-
 # All imports
 from pyparsing import Word, hexnums, WordEnd, Optional, alphas, alphanums
 from collections import defaultdict
@@ -26,6 +20,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 import pickle
 from sklearn.metrics import accuracy_score
 import concurrent.futures
+import array
 
 # Grid search cross-validation for tuning hyperparameters
 from sklearn.model_selection import GridSearchCV
