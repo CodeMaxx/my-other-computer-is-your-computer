@@ -59,6 +59,14 @@ class SupervisedModels():
     def __init__(self, X, y):
         self.X = X
         self.y = y
+    
+    def train_all(self):
+        self.trainSVC()
+        self.trainXGBC()
+        self.trainLogisticRegression()
+        self.trainKNN
+        self.train_RandomForest()
+        self.trainNeuralNetwork()
 
     def trainSVC(self):
         # Hyperparameter values
