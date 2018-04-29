@@ -145,7 +145,6 @@ class Preprocessing():
 			joblib.dump(byte_bigram,"../feature-dump/"+filename+"_BYTE_BIGRAM.pkl")
 
 		else:
-			print("ARLEAD1")
 			byte_unigram = joblib.load("../feature-dump/"+filename+"_BYTE_UNIGRAM.pkl")
 			byte_bigram = joblib.load("../feature-dump/"+filename+"_BYTE_BIGRAM.pkl")
 
@@ -156,7 +155,6 @@ class Preprocessing():
 			pixelIntensity = defaultdict(int, {"Pixel" + str(k): pixelIntensity[k] for k in range(1000)})
 			joblib.dump(pixelIntensity,"../feature-dump/"+filename+"_PIXEL_INTENSITY.pkl")
 		else:
-			print("ARLEAD2")
 			pixelIntensity = joblib.load("../feature-dump/"+filename+"_PIXEL_INTENSITY.pkl")
 
 
