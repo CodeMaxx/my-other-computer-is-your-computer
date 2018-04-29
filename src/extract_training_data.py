@@ -34,6 +34,7 @@ class Extract(threading.Thread):
         threading.Thread.__init__(self)
         self.start_index = start_index
         self.end_index = start_index + num
+        self.filenames = filenames
 
     def run(self):
         for i in range(self.start_index, self.end_index):
