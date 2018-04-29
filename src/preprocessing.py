@@ -23,7 +23,6 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 
-
 # All imports
 from pyparsing import Word, hexnums, WordEnd, Optional, alphas, alphanums
 from collections import defaultdict
@@ -140,7 +139,7 @@ class Preprocessing():
 		return p 
 
 	def _get_labels(self):
-		trainLabels = pd.read_csv("./trainLabels.csv", index_col=0)
+		trainLabels = pd.read_csv("../trainLabels.csv", index_col=0)
 		trainLabels = trainLabels['Class']
 		trainLabels = trainLabels.loc[Preprocessing.TRAIN_FILES]
 		return trainLabels

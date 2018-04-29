@@ -23,5 +23,17 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 
-# Plotting Graphs
-import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+
+def main():
+    labels = pd.read_csv("../trainLabels.csv", index_col=0)
+    np.random.seed(2)
+    msk = np.random.rand(len(labels)) < 0.66
+    train = labels[msk]
+    test = labels[~msk]
+    train.to_csv("../updatedTrainingLabels.csv")
+    test.to_csv("../updatedTestLabels.csv")
+
+if __name__ == "__main__":
+    main()
