@@ -35,8 +35,10 @@ import pickle
 import concurrent.futures
 import array
 from copy import copy
-from train import SupervisedModels, SemiSupervisedModels
+# from train import SupervisedModels, SemiSupervisedModels
 import logging
+# Reading and Writing pickle files
+from sklearn.externals import joblib
 
 # Grid search cross-validation for tuning hyperparameters
 from sklearn.model_selection import GridSearchCV
@@ -44,7 +46,7 @@ from sklearn.model_selection import GridSearchCV
 #######################################################################
 
 class Preprocessing():
-	SAMPLES_BASE_DIR = '../train/'
+	SAMPLES_BASE_DIR = '../samples/'
 	TRAIN_FILES = list(set([i[:20] for i in os.listdir(SAMPLES_BASE_DIR)]))[:2]
 
 	INSTRN_BIGRAM_THRESHOLD = 20
@@ -63,7 +65,7 @@ class Preprocessing():
 		return (train_data_points_, train_data_labels_)
 
 	def _getPixelIntensity(self, filename):
-		f = open(filename)
+		f = open(Preprocessing.SAMPLES_BASE_DIR + filename)
 		imageArray = array.array("B")
 		imageArray = np.fromfile(f, dtype='B')
 		imageArray = imageArray[-1000:]
@@ -71,6 +73,7 @@ class Preprocessing():
 		return imageArray
 
 	def _extract_features(self, filename):
+		# print(filename)
 		# use WordEnd to avoid parsing leading a-f of non-hex numbers as a hex
 		address_format = Word(hexnums, exact=8) + WordEnd()
 		byte_format = Word(hexnums, exact=2) + WordEnd()
@@ -84,48 +87,78 @@ class Preprocessing():
 		byte_bigram = defaultdict(int)
 		segments = defaultdict(int)
 
-		with open(Preprocessing.SAMPLES_BASE_DIR + filename + ".asm", 'r', encoding='Latin-1') as file:
-			prev, now = 0, 0
-			for line in file:
-				# Filtering lines
-				segments[line.split(':')[0]] += 1
-				if not line.startswith('.text'):
-					continue
-				if ' db ' in line or ' dd ' in line or ' dw ' in line or 'align ' in line:
-					continue
-					
-				try:
-					result = instrn_line_format.parseString(line)
-				except:
-					continue
-					
-				prev = now
-				now = result.instruction
-				instrn_bigram[(prev, now)] += 1
-				instrn_unigram[now] += 1
-
-		instrn_bigram = defaultdict(int, {k:v for k,v in instrn_bigram.items() \
-							if v > Preprocessing.INSTRN_BIGRAM_THRESHOLD and k[0] != 0})
-		with open(Preprocessing.SAMPLES_BASE_DIR + filename + ".bytes", 'r', encoding='Latin-1') as file:
-			prev, now = 0, 0
-			for line in file:
-				try:
-					result = byte_line_format.parseString(line)
-				except:
-					continue
-				
-				byte_list = list(result.bytes)
-				for byte in byte_list:
+		# Check if instrunction n-gram and segment size already there
+		if(os.path.isfile("../feature-dump/"+filename+"_INSTRN_UNIGRAM.pkl")!=True):
+			with open(Preprocessing.SAMPLES_BASE_DIR + filename + ".asm", 'r', encoding='Latin-1') as file:
+				prev, now = 0, 0
+				for line in file:
+					# Filtering lines
+					segments[line.split(':')[0]] += 1
+					if not line.startswith('.text'):
+						continue
+					if ' db ' in line or ' dd ' in line or ' dw ' in line or 'align ' in line:
+						continue
+						
+					try:
+						result = instrn_line_format.parseString(line)
+					except:
+						continue
+						
 					prev = now
-					now = byte
-					byte_bigram[(prev, now)] += 1
-					byte_unigram[now] += 1
+					now = result.instruction
+					instrn_bigram[(prev, now)] += 1
+					instrn_unigram[now] += 1
 
-		byte_bigram = defaultdict(int, {k:v for k,v in byte_bigram.items() \
-										if v > Preprocessing.BYTE_BIGRAM_THRESHOLD and k[0] != 0})
 
-		pixelIntensity = self._getPixelIntensity(filename + ".asm")
-		pixelIntensity = defaultdict(int, {"Pixel" + str(k): pixelIntensity[k] for k in range(1000)})
+			instrn_bigram = defaultdict(int, {k:v for k,v in instrn_bigram.items() \
+							if v > Preprocessing.INSTRN_BIGRAM_THRESHOLD and k[0] != 0})
+
+			joblib.dump(instrn_unigram,"../feature-dump/"+filename+"_INSTRN_UNIGRAM.pkl")
+			joblib.dump(instrn_bigram,"../feature-dump/"+filename+"_INSTRN_BIGRAM.pkl")
+			joblib.dump(segments,"../feature-dump/"+filename+"_SEGMENT_SIZE.pkl")
+
+		else:
+			segments = joblib.load("../feature-dump/"+filename+"_SEGMENT_SIZE.pkl")
+			instrn_unigram = joblib.load("../feature-dump/"+filename+"_INSTRN_UNIGRAM.pkl")
+			instrn_bigram = joblib.load("../feature-dump/"+filename+"_INSTRN_BIGRAM.pkl")
+
+		# Check if byte n-gram already there
+		if(os.path.isfile("../feature-dump/"+filename+"_BYTE_UNIGRAM.pkl")!=True):
+			with open(Preprocessing.SAMPLES_BASE_DIR + filename + ".bytes", 'r', encoding='Latin-1') as file:
+				prev, now = 0, 0
+				for line in file:
+					try:
+						result = byte_line_format.parseString(line)
+					except:
+						continue
+					
+					byte_list = list(result.bytes)
+					for byte in byte_list:
+						prev = now
+						now = byte
+						byte_bigram[(prev, now)] += 1
+						byte_unigram[now] += 1
+
+			byte_bigram = defaultdict(int, {k:v for k,v in byte_bigram.items() \
+											if v > Preprocessing.BYTE_BIGRAM_THRESHOLD and k[0] != 0})
+
+			joblib.dump(byte_unigram,"../feature-dump/"+filename+"_BYTE_UNIGRAM.pkl")
+			joblib.dump(byte_bigram,"../feature-dump/"+filename+"_BYTE_BIGRAM.pkl")
+
+		else:
+			print("ARLEAD1")
+			byte_unigram = joblib.load("../feature-dump/"+filename+"_BYTE_UNIGRAM.pkl")
+			byte_bigram = joblib.load("../feature-dump/"+filename+"_BYTE_BIGRAM.pkl")
+
+
+		# Check if pixel Intensity feature already there
+		if(os.path.isfile("../feature-dump/"+filename+"_PIXEL_INTENSITY.pkl")!=True):
+			pixelIntensity = self._getPixelIntensity(filename + ".asm")
+			pixelIntensity = defaultdict(int, {"Pixel" + str(k): pixelIntensity[k] for k in range(1000)})
+			joblib.dump(pixelIntensity,"../feature-dump/"+filename+"_PIXEL_INTENSITY.pkl")
+		else:
+			print("ARLEAD2")
+			pixelIntensity = joblib.load("../feature-dump/"+filename+"_PIXEL_INTENSITY.pkl")
 
 
 		all_features = copy(segments)
