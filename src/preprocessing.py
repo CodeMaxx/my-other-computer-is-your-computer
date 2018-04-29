@@ -1,27 +1,8 @@
-#! /usr/bin/env python3
 
-#  Copyright(c) Akash Trehan
-#  All rights reserved.
+# coding: utf-8
 
-#  This code is licensed under the MIT License.
+# In[10]:
 
-#  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files(the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-#  copies of the Software, and to permit persons to whom the Software is
-#  furnished to do so, subject to the following conditions:
-
-#  The above copyright notice and this permission notice shall be included in
-#  all copies or substantial portions of the Software.
-
-#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#  THE SOFTWARE.
 
 # All imports
 from pyparsing import Word, hexnums, WordEnd, Optional, alphas, alphanums
@@ -72,6 +53,23 @@ BYTE_BIGRAM_THRESHOLD = 100
 
 
 # In[13]:
+
+def getPixelIntensity(filename):
+	file = open(filename+".asm")
+	length = os.path.getsize(filename+".asm")
+	width = int(length**0.5)
+	imageArray = array.array("B")
+	imageArray = np.fromfile(file,dtype='B')
+	imageArray = imageArray[-1000:]
+	file.close()
+	return imageArray
+	# imageMatrix = reshape(imageArray,(width,width))
+
+	# print(type(imageMatrix[0][0]))
+	# plt.imsave(filename+".png",imageMatrix)
+
+
+
 
 
 def get_features(filename):
@@ -124,6 +122,9 @@ def get_features(filename):
 	            byte_unigram[now] += 1
 
 	byte_bigram = defaultdict(int, {k:v for k,v in byte_bigram.items() if v > BYTE_BIGRAM_THRESHOLD and k[0] != 0})
+
+	pixelIntensity = getPixelIntensity(filename)
+	pixelIntensity = defaultdict(int, {"Pixel"+str(k):pixelIntensity[k] for k in range(1000)})
 #     print(byte_unigram)
 #     print(sum(byte_unigram.values()))
 #     print("==========================================================================================")
@@ -134,6 +135,7 @@ def get_features(filename):
 	all_features.update(instrn_bigram)
 	all_features.update(byte_unigram)
 	all_features.update(byte_bigram)
+	all_features.update(pixelIntensity)
 	p = pd.DataFrame(all_features, index=[filename,])
 #     print(p)
 	print(filename)
