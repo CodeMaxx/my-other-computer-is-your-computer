@@ -43,6 +43,8 @@ from sklearn.externals import joblib
 # Grid search cross-validation for tuning hyperparameters
 from sklearn.model_selection import GridSearchCV
 
+from train import SupervisedModels
+
 #######################################################################
 
 class Preprocessing():
@@ -52,11 +54,11 @@ class Preprocessing():
 	def __init__(self, mode):
 		self.mode = mode
 		if mode:
-			self.samples_base_dir = '../../../testSamples/'
+			self.samples_base_dir = '../feature-dump/'
 			self.train_files = list(
 				set([i[:20] for i in os.listdir(self.samples_base_dir)]))
-			self.feature_dump = "../../../feature-dump/"
-			self.trainingLabels = "../updatedTestLabels.csv"
+			self.feature_dump = "../feature-dump/"
+			self.trainingLabels = "../trainLabels.csv"
 		else:
 			self.samples_base_dir = '../samples/'
 			self.train_files = list(
@@ -209,15 +211,24 @@ def main():
 
 	print("Training Classifiers...")
 
+	models = SupervisedModels(X_train, y_train)
+	models.train_all()
+
+	print("Trained All Models")
+
+	print("Average CV accuracy - Logistic Regression: ", models.lr.best_score_)
+	print("Average CV accuracy - SVC: ", models.svc.best_score_)
+	print("Average CV accuracy - Neural Network: ", models.nn.best_score_)
+	print("Average CV accuracy - KNN: ", models.knn.best_score_)
+	print("Average CV accuracy - XGBoost: ", models.xgbc.best_score_)
+	print("Average CV accuracy - Random Forest: ", models.rfc.best_score_)
+
+	print('All Done!')
+
+
 if __name__ == "__main__":
 	main()
 
-# models = SupervisedModels(X_train, y_train)
-# models.train_all()
 
-# print("Average CV accuracy: ", models.lr.best_score_)
-# print("Average CV accuracy: ", models.svc.best_score_)
-# print("Average CV accuracy: ", models.nn.best_score_)
-# print("Average CV accuracy: ", models.knn.best_score_)
-# print("Average CV accuracy: ", models.xgbc.best_score_)
-print('All Done!')
+
+

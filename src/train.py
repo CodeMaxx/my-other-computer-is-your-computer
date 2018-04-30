@@ -66,8 +66,8 @@ class SupervisedModels():
 
 
     # train random forest classifier and choose important features based on score
-    def feature_selection():
-        #
+    def feature_selection(self):
+        print("Started Random Forest Feature Selection...")
         min_samples_leaf_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         max_leaf_nodes = list(range(5,100,5))
         param_grid = dict(min_samples_leaf=min_samples_leaf_vals,max_leaf_nodes=max_leaf_nodes)
@@ -80,9 +80,12 @@ class SupervisedModels():
         # Fitting data
         rfc.fit(self.raw_X, self.y)
 
-        feature_scores =  dict(zip(self.all_features, rfc.feature_importances_)) 
+        feature_scores = dict(
+            zip(self.all_features, rfc.best_estimator_.feature_importances_))
         self.final_features = [feature for (feature,score) in feature_scores.items() if score > self.SCORE_IMPORTANCE_THRESHOLD]
         self.X = self.raw_X[self.final_features]
+
+        print("Feature Selection Complete")
 
 
     def train_all(self):
@@ -96,6 +99,7 @@ class SupervisedModels():
 
     def trainSVC(self):
         # Hyperparameter values
+        print("SVC training started...")
         C_vals = [0.01, 0.1, 1, 10, 100, 1000, 10000]
         gamma_vals = [0.001, 0.01, 0.1, 1]
 
@@ -112,7 +116,10 @@ class SupervisedModels():
 
         self.svc = svc
 
+        print("SVC trained!")
+
     def trainXGBC(self):
+        print("Starting XGBoost Classifier training...")
         max_depth = list(range(2,20))
         learning_rate = list(range(1,10))
         learning_rate = [x/10 for x in learning_rate]
@@ -126,7 +133,10 @@ class SupervisedModels():
 
         self.xgbc = xgbc
 
+        print("XGBoost Classifier trained!")
+
     def trainLogisticRegression(self):
+        print("Starting Logistic Regression...")
         param_grid = dict()
 
         _lr = LogisticRegression(random_state=42)
@@ -136,8 +146,10 @@ class SupervisedModels():
         joblib.dump(lr, 'lr.pkl')
 
         self.lr = lr
+        print("LR Classifer trained!")
 
     def trainKNN(self):
+        print("Starting KNN training...")
         n_neighbors = list(range(1,20)) 
         param_grid = dict(n_neighbors = n_neighbors)
 
@@ -148,8 +160,10 @@ class SupervisedModels():
         joblib.dump(knn, 'knn.pkl')
 
         self.knn = knn
+        print("KNN Classifer trained!")
 
     def train_RandomForest(self):
+        print("Starting Random Forest training...")
         # Hyperparameter values
         min_samples_leaf_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         max_leaf_nodes = list(range(5,100,5))
@@ -166,8 +180,10 @@ class SupervisedModels():
         joblib.dump(rfc, 'random_forest.pkl')
 
         self.rfc = rfc
+        print("Random Forest Classifier trained!")
     
     def trainNeuralNetwork(self):
+        print("Starting Neural Network training...")
         # Hyperparameter values
         hidden_layer_sizes_vals = [
             (8, 4), (8, 8), (16, 8), (16, 16), (32, 16), (32, 32), (64, 64), (96, 96)]
@@ -186,6 +202,7 @@ class SupervisedModels():
         # Create pickle file for model
         joblib.dump(nn, 'model4.pkl')
         self.nn = nn
+        print("Neural Network trained!")
 
 
 class SemiSupervisedModels():
