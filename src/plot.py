@@ -23,5 +23,14 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 
-# Plotting Graphs
-import matplotlib.pyplot as plt
+# Pandas for easier data representation
+import pandas as pd
+import numpy as np
+
+# For plotting plots
+from matplotlib import plotly as plt
+
+# Reading and Writing pickle files
+from sklearn.externals import joblib
+
+
