@@ -57,10 +57,36 @@ from sklearn.model_selection import GridSearchCV
 
 class SupervisedModels():
     def __init__(self, X, y):
-        self.X = X
-        self.y = y
-    
+        self.raw_X = X                           # Data with all features
+        self.all_features = list(X)              # List of all features
+        self.final_features = None               # List of important features
+        self.X = None                           # final data with important features
+        self.y = y                              # Training point labels
+        self.SCORE_IMPORTANCE_THRESHOLD = 0.1
+
+
+    # train random forest classifier and choose important features based on score
+    def feature_selection():
+        #
+        min_samples_leaf_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        max_leaf_nodes = list(range(5,100,5))
+        param_grid = dict(min_samples_leaf=min_samples_leaf_vals,max_leaf_nodes=max_leaf_nodes)
+
+        # Classifier
+        _rfc = RandomForestClassifier(
+            max_depth=20, random_state=3, n_estimators=100, n_jobs=-1)
+        rfc = GridSearchCV(_rfc, param_grid, cv=5, scoring='accuracy')
+
+        # Fitting data
+        rfc.fit(self.raw_X, self.y)
+
+        feature_scores =  dict(zip(self.all_features, rfc.feature_importances_)) 
+        self.final_features = [feature for (feature,score) in feature_scores.items() if score > self.SCORE_IMPORTANCE_THRESHOLD]
+        self.X = self.raw_X[self.final_features]
+
+
     def train_all(self):
+        self.feature_selection()
         self.trainSVC()
         self.trainXGBC()
         self.trainLogisticRegression()
