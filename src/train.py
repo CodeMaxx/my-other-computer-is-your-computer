@@ -64,7 +64,7 @@ class SupervisedModels():
         self.trainSVC()
         self.trainXGBC()
         self.trainLogisticRegression()
-        self.trainKNN
+        self.trainKNN()
         self.train_RandomForest()
         self.trainNeuralNetwork()
 
@@ -87,7 +87,10 @@ class SupervisedModels():
         self.svc = svc
 
     def trainXGBC(self):
-        param_grid = dict()
+        max_depth = list(range(2,20))
+        learning_rate = list(range(1,10))
+        learning_rate = [x/10 for x in learning_rate]
+        param_grid = dict(max_depth=max_depth,learning_rate=learning_rate)
 
         _xgbc = XGBClassifier(random_state=42)
         xgbc = GridSearchCV(_xgbc, param_grid, cv=5, scoring='accuracy')
@@ -109,7 +112,8 @@ class SupervisedModels():
         self.lr = lr
 
     def trainKNN(self):
-        param_grid = dict()
+        n_neighbors = list(range(1,20)) 
+        param_grid = dict(n_neighbors = n_neighbors)
 
         _knn = KNeighborsClassifier(random_state=42)
         knn = GridSearchCV(_knn, param_grid, cv=5, scoring='accuracy')
@@ -122,7 +126,8 @@ class SupervisedModels():
     def train_RandomForest(self):
         # Hyperparameter values
         min_samples_leaf_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        param_grid = dict(min_samples_leaf=min_samples_leaf_vals)
+        max_leaf_nodes = list(range(5,100,5))
+        param_grid = dict(min_samples_leaf=min_samples_leaf_vals,max_leaf_nodes=max_leaf_nodes)
 
         # Classifier
         _rfc = RandomForestClassifier(
