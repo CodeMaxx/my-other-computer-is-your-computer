@@ -62,11 +62,11 @@ class SupervisedModels():
         self.final_features = None               # List of important features
         self.X = None                           # final data with important features
         self.y = y                              # Training point labels
-        self.SCORE_IMPORTANCE_THRESHOLD = 0.1
+        # self.SCORE_IMPORTANCE_THRESHOLD = 0.1
 
 
     # train random forest classifier and choose important features based on score
-    def feature_selection():
+    def feature_selection(SCORE_IMPORTANCE_THRESHOLD):
         #
         min_samples_leaf_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         max_leaf_nodes = list(range(5,100,5))
@@ -81,18 +81,20 @@ class SupervisedModels():
         rfc.fit(self.raw_X, self.y)
 
         feature_scores =  dict(zip(self.all_features, rfc.feature_importances_)) 
-        self.final_features = [feature for (feature,score) in feature_scores.items() if score > self.SCORE_IMPORTANCE_THRESHOLD]
+        self.final_features = [feature for (feature,score) in feature_scores.items() if score > SCORE_IMPORTANCE_THRESHOLD]
         self.X = self.raw_X[self.final_features]
 
 
     def train_all(self):
-        self.feature_selection()
-        self.trainSVC()
-        self.trainXGBC()
-        self.trainLogisticRegression()
-        self.trainKNN()
-        self.train_RandomForest()
-        self.trainNeuralNetwork()
+        # For different threshold for feature selection
+        for SCORE_IMPORTANCE_THRESHOLD in list(range(10))/20:
+            self.feature_selection(SCORE_IMPORTANCE_THRESHOLD)
+            self.trainSVC()
+            self.trainXGBC()
+            self.trainLogisticRegression()
+            self.trainKNN()
+            self.train_RandomForest()
+            self.trainNeuralNetwork()
 
     def trainSVC(self):
         # Hyperparameter values
