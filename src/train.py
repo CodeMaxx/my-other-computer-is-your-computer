@@ -53,6 +53,8 @@ from sklearn.neural_network import MLPClassifier
 # Grid search cross-validation for tuning hyperparameters
 from sklearn.model_selection import GridSearchCV
 
+import plot
+
 ########################################################################
 
 class SupervisedModels():
@@ -62,12 +64,12 @@ class SupervisedModels():
         self.final_features = None               # List of important features
         self.X = None                           # final data with important features
         self.y = y                              # Training point labels
-        # self.SCORE_IMPORTANCE_THRESHOLD = 0.1
+        self.SCORE_IMPORTANCE_THRESHOLD = 0.0
 
 
     # train random forest classifier and choose important features based on score
     def feature_selection(SCORE_IMPORTANCE_THRESHOLD):
-        self.SCORE_IMPORTANCE_THRESHOLD = 0.1
+        self.SCORE_IMPORTANCE_THRESHOLD = SCORE_IMPORTANCE_THRESHOLD
         self.feature_selection()
 
 
@@ -126,6 +128,9 @@ class SupervisedModels():
 
         print("SVC trained!")
 
+        # Hyper parameter plot 
+        plot_svc(self.svc, C_vals, gamma_vals, self.SCORE_IMPORTANCE_THRESHOLD)
+
     def trainXGBC(self):
         print("Starting XGBoost Classifier training...")
         max_depth = list(range(2,20))
@@ -143,9 +148,14 @@ class SupervisedModels():
 
         print("XGBoost Classifier trained!")
 
+         # Hyper parameter plot 
+        plot_XGBC(self.xgbc, max_depth, learning_rate, self.SCORE_IMPORTANCE_THRESHOLD)
+
+
     def trainLogisticRegression(self):
         print("Starting Logistic Regression...")
-        param_grid = dict()
+        C_vals = [0.01, 0.1, 1, 10, 100, 1000, 10000]
+        param_grid = dict(C = C_vals)
 
         _lr = LogisticRegression(random_state=42)
         lr = GridSearchCV(_lr, param_grid, cv=5, scoring='accuracy')
@@ -155,6 +165,10 @@ class SupervisedModels():
 
         self.lr = lr
         print("LR Classifer trained!")
+
+         # Hyper parameter plot 
+        plot_LogisticRegression(self.lr, C_vals, self.SCORE_IMPORTANCE_THRESHOLD)
+
 
     def trainKNN(self):
         print("Starting KNN training...")
@@ -169,6 +183,10 @@ class SupervisedModels():
 
         self.knn = knn
         print("KNN Classifer trained!")
+
+         # Hyper parameter plot 
+        plot_KNN(self.knn, n_neighbors, self.SCORE_IMPORTANCE_THRESHOLD)
+
 
     def train_RandomForest(self):
         print("Starting Random Forest training...")
@@ -189,6 +207,9 @@ class SupervisedModels():
 
         self.rfc = rfc
         print("Random Forest Classifier trained!")
+
+        # Plot for hyper parameter tuning for give threshold
+        plot_RandomForest(self.rfc, min_samples_leaf_vals,  max_leaf_nodes, self.SCORE_IMPORTANCE_THRESHOLD)
     
     def trainNeuralNetwork(self):
         print("Starting Neural Network training...")
@@ -211,6 +232,10 @@ class SupervisedModels():
         joblib.dump(nn, 'model4.pkl')
         self.nn = nn
         print("Neural Network trained!")
+
+        # Plot for hyper parameter tuning for give threshold
+        plot_MLPClassifier(self.nn, hidden_layer_sizes_vals, max_iter_vals, self.SCORE_IMPORTANCE_THRESHOLD)
+ 
 
 
 class SemiSupervisedModels():
