@@ -54,6 +54,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import GridSearchCV
 
 import plot
+import voting
 
 ########################################################################
 
@@ -68,7 +69,7 @@ class SupervisedModels():
 
 
     # train random forest classifier and choose important features based on score
-    def feature_selection(SCORE_IMPORTANCE_THRESHOLD):
+    def feature_selection(self,SCORE_IMPORTANCE_THRESHOLD):
         self.SCORE_IMPORTANCE_THRESHOLD = SCORE_IMPORTANCE_THRESHOLD
         self.feature_selection()
 
@@ -98,14 +99,16 @@ class SupervisedModels():
 
     def train_all(self):
         # For different threshold for feature selection
-        for SCORE_IMPORTANCE_THRESHOLD in list(range(10))/20:
-            self.feature_selection(SCORE_IMPORTANCE_THRESHOLD)
-            self.trainSVC()
-            self.trainXGBC()
-            self.trainLogisticRegression()
-            self.trainKNN()
-            self.train_RandomForest()
-            self.trainNeuralNetwork()
+        # for SCORE_IMPORTANCE_THRESHOLD in list(range(10))/20:
+        # self.feature_selection(SCORE_IMPORTANCE_THRESHOLD)
+        self.feature_selection(0.1)
+        self.trainSVC()
+        self.trainXGBC()
+        self.trainLogisticRegression()
+        self.trainKNN()
+        self.train_RandomForest()
+        self.trainNeuralNetwork()
+        self.trainVotingClassifier()
 
     def trainSVC(self):
         # Hyperparameter values
@@ -229,12 +232,22 @@ class SupervisedModels():
         # Fitting data
         nn.fit(self.X, self.y)
         # Create pickle file for model
-        joblib.dump(nn, 'model4.pkl')
+        joblib.dump(nn, 'neural_network.pkl')
         self.nn = nn
         print("Neural Network trained!")
 
         # Plot for hyper parameter tuning for give threshold
         plot_MLPClassifier(self.nn, hidden_layer_sizes_vals, max_iter_vals, self.SCORE_IMPORTANCE_THRESHOLD)
+
+    def trainVotingClassifier(self):
+        print("Starting Voting Classifier...")
+
+        # Initialising Voting Classifier
+        self.VC = voting.VotingClassifier([self.svc,self.xgbc,self.lr,self.knn,self.rfc,self.nn])
+        # Create pickle file for model
+        joblib.dump(nn, 'voting_classifier.pkl')
+        self.nn = nn
+        print("Voting Classifier trained!")
  
 
 
