@@ -61,11 +61,12 @@ from voting import VotingClassifier
 class SupervisedModels():
     def __init__(self, X, y):
         self.raw_X = X                           # Data with all features
-        self.all_features = list(X)              # List of all features
+        self.all_features = list(X.columns)              # List of all features
+        # print(self.all_features)
         self.final_features = None               # List of important features
         self.X = None                           # final data with important features
         self.y = y                              # Training point labels
-        self.SCORE_IMPORTANCE_THRESHOLD = 0.0
+        self.SCORE_IMPORTANCE_THRESHOLD = 0.01
 
 
     # train random forest classifier and choose important features based on score
@@ -77,8 +78,10 @@ class SupervisedModels():
     # train random forest classifier and choose important features based on score
     def feature_selection_core(self):
         print("Started Random Forest Feature Selection...")
-        min_samples_leaf_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        max_leaf_nodes = list(range(5,100,5))
+        # min_samples_leaf_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        # max_leaf_nodes = list(range(5,100,5))
+        min_samples_leaf_vals = [1, 2, 3, 4]
+        max_leaf_nodes = list(range(5,10,5))
         param_grid = dict(min_samples_leaf=min_samples_leaf_vals,max_leaf_nodes=max_leaf_nodes)
 
         # Classifier
@@ -88,12 +91,12 @@ class SupervisedModels():
 
         # Fitting data
         rfc.fit(self.raw_X, self.y)
-
+        # print(self.all_features, rfc.best_estimator_.feature_importances_)
         feature_scores = dict(
             zip(self.all_features, rfc.best_estimator_.feature_importances_))
         self.final_features = [feature for (feature,score) in feature_scores.items() if score > self.SCORE_IMPORTANCE_THRESHOLD]
         self.X = self.raw_X[self.final_features]
-
+        print(len(self.all_features),len(self.final_features))
         print("Feature Selection Complete")
 
 
@@ -101,7 +104,7 @@ class SupervisedModels():
         # For different threshold for feature selection
         # for SCORE_IMPORTANCE_THRESHOLD in list(range(10))/20:
         # self.feature_selection(SCORE_IMPORTANCE_THRESHOLD)
-        self.feature_selection(0.1)
+        self.feature_selection(0.001)
         self.trainSVC()
         self.trainXGBC()
         self.trainLogisticRegression()
@@ -132,7 +135,7 @@ class SupervisedModels():
         print("SVC trained!")
 
         # Hyper parameter plot 
-        plot_svc(self.svc, C_vals, gamma_vals, self.SCORE_IMPORTANCE_THRESHOLD)
+        plot_SVC(self.svc, C_vals, gamma_vals, self.SCORE_IMPORTANCE_THRESHOLD)
 
     def trainXGBC(self):
         print("Starting XGBoost Classifier training...")

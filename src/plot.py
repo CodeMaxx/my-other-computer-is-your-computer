@@ -114,7 +114,7 @@ def plot_LogisticRegression(lr, C_vals, SCORE_IMPORTANCE_THRESHOLD):
 
     # Get coordinates of best parameters
     max_x = lr.best_params_['C']
-    max_y = round(rfc.best_score_, 3)
+    max_y = round(lr.best_score_, 3)
 
     # Annotate best point on graph
     plt.annotate('Max at (%s, %s)' % (str(max_x), str(max_y)), xy=(max_x, max_y), xytext=(max_x, max_y-0.01),

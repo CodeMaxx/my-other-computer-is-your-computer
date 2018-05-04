@@ -56,7 +56,7 @@ class Preprocessing():
 		if mode:
 			self.samples_base_dir = '../feature-dump/'
 			self.train_files = list(
-				set([i[:20] for i in os.listdir(self.samples_base_dir)]))[:50]
+				set([i[:20] for i in os.listdir(self.samples_base_dir)]))[:100]
 			self.feature_dump = "../feature-dump/"
 			self.trainingLabels = "../trainLabels.csv"
 		else:
@@ -194,6 +194,8 @@ class Preprocessing():
 	def scaler(self, train_data_):
 		scaler = MinMaxScaler()
 		scaled_train_data_ = scaler.fit_transform(train_data_)
+		scaled_train_data_ = pd.DataFrame(scaled_train_data_, index = train_data_.index, columns = train_data_.columns)
+		# print(type(scaled_train_data_))
 		return scaled_train_data_
 
 
