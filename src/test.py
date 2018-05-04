@@ -43,51 +43,89 @@ class Predictor():
 		self.Models = joblib.load(fileName)
 
 	def predict(self,testData,model):
-		return self.model.predict(testData)
+		return model.predict(testData)
 
 	def cprint(self, str):
-        print("\n" + "-"*25 + " " + str + " " + "-"*25 + "\n")
+		print("\n"+"-"*25+" "+str+" "+"-"*25+"\n")
 
-	def checkAccuracy(self,X_test,model,labels)
-		predictions = self.predict(X_test,model)
+	def checkAccuracy(self,X_test,model,labels):
+		if(model=="lr"):
+			mdl = self.Models.lr
+		elif(model=="svc"):
+			mdl = self.Models.svc
+		elif(model=="nn"):
+			mdl = self.Models.nn
+		elif(model=="knn"):
+			mdl = self.Models.knn
+		elif(model=="xgbc"):
+			mdl = self.Models.xgbc
+		elif(model=="rfc"):
+			mdl = self.Models.rfc
+		elif(model=="vc"):
+			mdl = self.Models.vc
+		else:
+			print(model)
+		print(model)
+		predictions = self.predict(X_test,mdl)
+		print(predictions)
+		print(labels)
 		correct = sum([predictions[i]==labels[i] for i in range(len(predictions))])
 		return correct*100/len(predictions)
 
 def main():
 	mode = int(sys.argv[1])
-	filename = int(sys.argv[2])
+	if(mode==1):
+		filename = int(sys.argv[2])
 	print("Starting Testing Experiment...")
 	print("Extracting Features from test Data...")
 
-	if mode==0:
+	if mode==1:
 		p = Preprocessing(fileName)
 		X_test = p.get_processed_data(1)
 	else:
 		p = Preprocessing(1)
-		X_test = p.get_processed_data(0)
+		X_test, y_test = p.get_processed_data(0)
 
 	print("Feature extraction complete")
 
-	print("Normalising...")
+	predictor = Predictor("finalModels.pkl")
 
-	X_test = p.scaler(X_test)
+	# print(predictor.Models.final_features)
+	# print(X_test.columns)
+
+	for feature in predictor.Models.final_features:
+		if(feature not in X_test.columns):
+			X_test[feature] = 0
+			# print(X_test.columns)
+	for feature in X_test.columns:
+		if(feature not in predictor.Models.final_features):
+			del X_test[feature]
+			# print(X_test.columns)
+
+	print(X_test.columns)
+	X_test.columns = [str(x) for x in X_test.columns]
+	X_test = X_test.reindex_axis(sorted(X_test.columns), axis=1)
+
+	print("Normalising...")
+	print(X_test)
+
+	# scaled_X_test = np.array(X_test)
+	# print(scaled_X_test)
+	scaled_X_test = predictor.Models.scaler.transform(X_test.values)
+	X_test = pd.DataFrame(scaled_X_test, index = X_test.index, columns = X_test.columns)
 
 	print("Data points normalised")
 
-	predictors = Predictor("finalModels.pkl")
-
 	modelNames = ["Logistic Regression","SVC","Neural Network","KNN","XGBoost","Random Forest","Voting Classifier"]
-	models = ["lr","svc","nn","knn","xgbc","rf","vc"]
+	models = ["lr","svc","nn","knn","xgbc","rfc","vc"]
 
-	if mode==0:
-		predictions = [predictors.predict(X_test,model) for model in models]
+	if mode==1:
+		predictions = [predictor.predict(X_test,model) for model in models]
 		modelWisePrediction = dict(zip(modelNames,predictions))
 
 	else:
-		file = open("../updatedTestLabels.csv",'r')
-		labels = [lines[0] for lines in [line.split(',') for line in file.readlines()[1:]]]
-		for i,model in models:
-			accuracy = predictors.checkAccuracy(X_test,model,labels)
+		for i,model in enumerate(models):
+			accuracy = predictor.checkAccuracy(X_test,model,p.actualLabels)
 			print("Accuracy - "+modelNames[i]+" : ", accuracy)
 
 	print('All Done!')

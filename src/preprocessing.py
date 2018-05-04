@@ -43,7 +43,8 @@ from sklearn.externals import joblib
 # Grid search cross-validation for tuning hyperparameters
 from sklearn.model_selection import GridSearchCV
 
-from train import SupervisedModels
+from train import *
+import random
 
 #######################################################################
 
@@ -57,20 +58,24 @@ class Preprocessing():
 			self.samples_base_dir = '../feature-dump/'
 			file = open("../updatedTrainingLabels.csv",'r')
 			self.files = [lines[0] for lines in [line.split(',') for line in file.readlines()[1:]]]
+			random.shuffle(self.files)
+			self.files = self.files[:1000]
 			self.feature_dump = "../feature-dump/"
 			self.trainingLabels = "../trainLabels.csv"
 			self.targetFeatureDump = "../all-feature-dump-train/"
 		elif mode==1:
 			self.samples_base_dir = '../feature_dump/'
-			file = open("../updatedTestLabels.csv",'r')
-			self.files = [lines[0] for lines in [line.split(',') for line in file.readlines()[1:]]]
+			file = open("../sampleTestLabels.csv",'r')
+			file = [line.split(',') for line in file.readlines()[1:]]
+			self.files = [lines[0] for lines in file]
+			self.actualLabels = [int(lines[1]) for lines in file]
 			self.feature_dump = "../feature_dump/"
 			self.targetFeatureDump = "../all-feature-dump-test/"
 		else:
-			self.samples_base_dir = "../new-files-test/"
+			self.samples_base_dir = "../new-files/"
 			self.files = [mode]
-			self.feature_dump = "../new-files-features/"
-			self.targetFeatureDump = "../new-files-features/"
+			self.feature_dump = "../new-files-feature-dump/"
+			self.targetFeatureDump = "../new-files-all-feature-dump/"
 
 
 	def get_processed_data(self,isNew):
@@ -91,6 +96,8 @@ class Preprocessing():
 				i += 1
 		train_data_points_.fillna(0, inplace=True)
 		train_data_labels_ = self._get_labels()
+		train_data_points_.columns = [str(x) for x in train_data_points_]
+		train_data_points_ = train_data_points_.reindex_axis(sorted(train_data_points_.columns), axis=1)
 		return (train_data_points_, train_data_labels_)
 
 	def _getPixelIntensity(self, filename):
@@ -117,7 +124,7 @@ class Preprocessing():
 		segments = defaultdict(int)
 
 		# Check if instrunction n-gram and segment size already there
-		print(os.path.isfile(self.feature_dump + filename + "_INSTRN_UNIGRAM.pkl"),filename)
+		# print(os.path.isfile(self.feature_dump + filename + "_INSTRN_UNIGRAM.pkl"),filename)
 		if(os.path.isfile(self.feature_dump + filename + "_INSTRN_UNIGRAM.pkl")!=True):
 			with open(self.samples_base_dir + filename + ".asm", 'r', encoding='Latin-1') as file:
 				prev, now = 0, 0
@@ -210,13 +217,6 @@ class Preprocessing():
 		trainLabels = trainLabels.loc[self.files]
 		return trainLabels
 
-	def scaler(self, train_data_):
-		scaler = MinMaxScaler()
-		scaled_train_data_ = scaler.fit_transform(train_data_)
-		scaled_train_data_ = pd.DataFrame(scaled_train_data_, index = train_data_.index, columns = train_data_.columns)
-		return scaled_train_data_
-
-
 def main():
 	print("Starting Experiment...")
 	print("Extracting Features...")
@@ -228,15 +228,14 @@ def main():
 
 	print("Normalising...")
 
-	X_train = p.scaler(X_train)
+	X_train,scaler = scale(X_train)
 
 	print("Data points normalised")
 
 	print("Training Classifiers...")
 
-	models = SupervisedModels(X_train, y_train)
+	models = SupervisedModels(X_train, y_train, scaler)
 	models.train_all()
-
 
 	# Create a pickle file for model
 	joblib.dump(models,"finalModels.pkl")

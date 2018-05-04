@@ -40,6 +40,7 @@ import numpy as np
 
 # Reading and Writing pickle files
 from sklearn.externals import joblib
+from sklearn.preprocessing import MinMaxScaler
 
 # Various Classifiers used
 from sklearn.svm import SVC
@@ -58,8 +59,15 @@ from voting import VotingClassifier
 
 ########################################################################
 
+
+def scale(train_data_):
+    scaler = MinMaxScaler()
+    scaled_train_data_ = scaler.fit_transform(train_data_.values)
+    scaled_train_data_ = pd.DataFrame(scaled_train_data_, index = train_data_.index, columns = train_data_.columns)
+    return scaled_train_data_,scaler
+
 class SupervisedModels():
-    def __init__(self, X, y):
+    def __init__(self, X, y, scaler):
         self.raw_X = X                           # Data with all features
         self.all_features = list(X.columns)              # List of all features
         # print(self.all_features)
@@ -67,6 +75,7 @@ class SupervisedModels():
         self.X = None                           # final data with important features
         self.y = y                              # Training point labels
         self.SCORE_IMPORTANCE_THRESHOLD = 0.01
+        self.scaler = scaler
 
     # Print helper function
     def cprint(self, str):
@@ -97,12 +106,19 @@ class SupervisedModels():
         # self.cprint(self.all_features, rfc.best_estimator_.feature_importances_)
         feature_scores = dict(
             zip(self.all_features, rfc.best_estimator_.feature_importances_))
-        self.final_features = [feature for (feature,score) in feature_scores.items() if score > self.SCORE_IMPORTANCE_THRESHOLD]
+        self.final_features = [feature for (feature,score) in feature_scores.items() if score > 0]
         # self.cprint(self.raw_X)
         # self.cprint(self.final_features)
         fi = np.array(self.final_features, dtype=object)
         self.X = self.raw_X[fi]
         print(len(self.all_features),len(self.final_features))
+        self.X.columns = [str(x) for x in self.X]
+        self.X = self.X.reindex_axis(sorted(self.X.columns), axis=1)
+
+        self.X,scaler = scale(self.X)
+        self.scaler = scaler
+        # print(self.y)
+        # print(feature_scores)
         self.cprint("Feature Selection Complete")
 
 
@@ -110,7 +126,8 @@ class SupervisedModels():
         # For different threshold for feature selection
         # for SCORE_IMPORTANCE_THRESHOLD in list(range(10))/20:
         # self.feature_selection(SCORE_IMPORTANCE_THRESHOLD)
-        self.feature_selection(0.001)
+        # print(self.raw_X)
+        self.feature_selection(0.0001)
         self.trainSVC()
         self.trainXGBC()
         self.trainLogisticRegression()
