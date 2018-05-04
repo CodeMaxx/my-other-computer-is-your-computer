@@ -80,8 +80,8 @@ class SupervisedModels():
         print("Started Random Forest Feature Selection...")
         # min_samples_leaf_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         # max_leaf_nodes = list(range(5,100,5))
-        min_samples_leaf_vals = [1, 2, 3, 4]
-        max_leaf_nodes = list(range(5,10,5))
+        min_samples_leaf_vals = list(range(2,10,2))
+        max_leaf_nodes = list(range(5,20,5))
         param_grid = dict(min_samples_leaf=min_samples_leaf_vals,max_leaf_nodes=max_leaf_nodes)
 
         # Classifier
@@ -119,7 +119,7 @@ class SupervisedModels():
     def trainSVC(self):
         # Hyperparameter values
         print("SVC training started...")
-        C_vals = [0.01, 0.1, 1, 10, 100, 1000, 10000]
+        C_vals = [0.01, 0.1, 1, 10, 100, 1000]
         gamma_vals = [0.001, 0.01, 0.1, 1]
 
         param_grid = dict(C=C_vals, gamma=gamma_vals)
@@ -142,8 +142,8 @@ class SupervisedModels():
 
     def trainXGBC(self):
         print("Starting XGBoost Classifier training...")
-        max_depth = list(range(5,15,2))
-        learning_rate = list(range(1,10,2))
+        max_depth = list(range(5,20,5))
+        learning_rate = list(range(2,10,2))
         learning_rate = [x/10 for x in learning_rate]
         param_grid = dict(max_depth=max_depth,learning_rate=learning_rate)
 
@@ -163,7 +163,7 @@ class SupervisedModels():
 
     def trainLogisticRegression(self):
         print("Starting Logistic Regression...")
-        C_vals = [0.01, 0.1, 1, 10, 100, 1000, 10000]
+        C_vals = [0.01, 0.1, 1, 10, 100, 1000]
         param_grid = dict(C = C_vals)
 
         _lr = LogisticRegression(random_state=42)
@@ -181,7 +181,7 @@ class SupervisedModels():
 
     def trainKNN(self):
         print("Starting KNN training...")
-        n_neighbors = list(range(1,20,2)) 
+        n_neighbors = list(range(2,10,2)) 
         param_grid = dict(n_neighbors = n_neighbors)
 
         _knn = KNeighborsClassifier()
@@ -200,8 +200,8 @@ class SupervisedModels():
     def train_RandomForest(self):
         print("Starting Random Forest training...")
         # Hyperparameter values
-        min_samples_leaf_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        max_leaf_nodes = list(range(5,100,5))
+        min_samples_leaf_vals = list(range(2,10,2))
+        max_leaf_nodes = list(range(5,20,5))
         param_grid = dict(min_samples_leaf=min_samples_leaf_vals,max_leaf_nodes=max_leaf_nodes)
 
         # Classifier
@@ -224,8 +224,8 @@ class SupervisedModels():
         print("Starting Neural Network training...")
         # Hyperparameter values
         hidden_layer_sizes_vals = [
-            (8, 4), (8, 8), (16, 8), (16, 16), (32, 16), (32, 32), (64, 64), (96, 96)]
-        max_iter_vals = [5, 10, 20, 50, 100, 200]
+            (8, 4), (16, 8), (32, 16), (64, 32), (96, 64)]
+        max_iter_vals = [5, 25, 50, 100]
 
         param_grid = dict(
             hidden_layer_sizes=hidden_layer_sizes_vals, max_iter=max_iter_vals)
