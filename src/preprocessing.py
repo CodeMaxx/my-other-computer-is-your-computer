@@ -58,24 +58,28 @@ class Preprocessing():
 			self.files = []
 			# self.train_files = list(
 			# 	set([i[:20] for i in os.listdir(self.samples_base_dir)]))[:20]
-			with open("../updatedTrainingLabels.csv") as file:
-				for line in file:
-					lines = line.split(',')
-					self.files.append(line[0])
+			file = open("../updatedTrainingLabels.csv",'r')
+			self.files = [lines[0] for lines in [line.split(',') for line in file.readlines()[1:]] ]
+			# with open("../updatedTrainingLabels.csv") as file:
+			# 	for line in file:
+			# 		lines = line.split(',')
+			# 		self.files.append(lines[0])
 			self.feature_dump = "../feature-dump/"
 			self.trainingLabels = "../trainLabels.csv"
-			self.targetFeatureDump = "../feature-dump-train/"
+			self.targetFeatureDump = "../all-feature-dump-train/"
 		elif mode==1:
 			self.samples_base_dir = '../feature_dump/'
 			self.files = []
 			# self.test_files = list(
 			# 	set([i[:20] for i in os.listdir(self.samples_base_dir)]))[:2]
-			with open("../updatedTestLabels.csv") as file:
-				for line in file:
-					lines = line.split(',')
-					self.files.append(line[0])
+			file = open("../updatedTestLabels.csv",'r')
+			self.files = [lines[0] for lines in [line.split(',') for line in file.readlines()[1:]] ]
+			# with open("../updatedTestLabels.csv") as file:
+			# 	for line in file:
+			# 		lines = line.split(',')
+			# 		self.files.append(lines[0])
 			self.feature_dump = "../feature_dump/"
-			self.targetFeatureDump = "../feature-dump-test/"
+			self.targetFeatureDump = "../all-feature-dump-test/"
 
 
 	def get_processed_data(self):
