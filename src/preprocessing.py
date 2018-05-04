@@ -57,7 +57,7 @@ class Preprocessing():
 			self.samples_base_dir = '../feature-dump/'
 			# self.train_files = list(
 			# 	set([i[:20] for i in os.listdir(self.samples_base_dir)]))[:20]
-			with open("../updatedTrainLabels.csv") as file:
+			with open("../updatedTrainingLabels.csv") as file:
 				for line in file:
 					lines = line.split(',')
 					self.train_files.append(line[0])
