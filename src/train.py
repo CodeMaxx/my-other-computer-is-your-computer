@@ -253,10 +253,10 @@ class SupervisedModels():
         self.cprint("Starting Voting Classifier...")
 
         # Initialising Voting Classifier
-        VC = VotingClassifier([self.svc,self.xgbc,self.lr,self.knn,self.rfc,self.nn])
-        self.VC = VC
+        vc = VotingClassifier([self.svc,self.xgbc,self.lr,self.knn,self.rfc,self.nn])
+        self.vc = vc
         # Create pickle file for model
-        joblib.dump(self.VC, 'voting_classifier.pkl')
+        joblib.dump(vc, 'voting_classifier.pkl')
         self.cprint("Voting Classifier trained!")
  
 

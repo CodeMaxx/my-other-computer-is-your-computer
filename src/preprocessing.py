@@ -55,49 +55,43 @@ class Preprocessing():
 		self.mode = mode
 		if mode==0:
 			self.samples_base_dir = '../feature-dump/'
-			self.files = []
-			# self.train_files = list(
-			# 	set([i[:20] for i in os.listdir(self.samples_base_dir)]))[:20]
 			file = open("../updatedTrainingLabels.csv",'r')
-			self.files = [lines[0] for lines in [line.split(',') for line in file.readlines()[1:]] ]
-			# with open("../updatedTrainingLabels.csv") as file:
-			# 	for line in file:
-			# 		lines = line.split(',')
-			# 		self.files.append(lines[0])
+			self.files = [lines[0] for lines in [line.split(',') for line in file.readlines()[1:]]]
 			self.feature_dump = "../feature-dump/"
 			self.trainingLabels = "../trainLabels.csv"
 			self.targetFeatureDump = "../all-feature-dump-train/"
 		elif mode==1:
 			self.samples_base_dir = '../feature_dump/'
-			self.files = []
-			# self.test_files = list(
-			# 	set([i[:20] for i in os.listdir(self.samples_base_dir)]))[:2]
 			file = open("../updatedTestLabels.csv",'r')
-			self.files = [lines[0] for lines in [line.split(',') for line in file.readlines()[1:]] ]
-			# with open("../updatedTestLabels.csv") as file:
-			# 	for line in file:
-			# 		lines = line.split(',')
-			# 		self.files.append(lines[0])
+			self.files = [lines[0] for lines in [line.split(',') for line in file.readlines()[1:]]]
 			self.feature_dump = "../feature_dump/"
 			self.targetFeatureDump = "../all-feature-dump-test/"
+		else:
+			self.samples_base_dir = "../new-files-test/"
+			self.files = [mode]
+			self.feature_dump = "../new-files-features/"
+			self.targetFeatureDump = "../new-files-features/"
 
 
-	def get_processed_data(self):
+	def get_processed_data(self,isNew):
 		mode = self.mode
 		i = 0
 		train_data_points_ = pd.DataFrame()
-		with concurrent.futures.ProcessPoolExecutor() as executor:
-			for features in executor.map(self._extract_features, self.files):
+		if isNew==1:
+			with concurrent.futures.ProcessPoolExecutor() as executor:
+				for features in executor.map(self._extract_features, self.files):
+					train_data_points_ = pd.concat([train_data_points_, features], axis=0)
+					print(i,len(train_data_points_))
+					i += 1
+		else:
+			for filename in self.files:
+				features = joblib.load(self.targetFeatureDump + filename + "_all_features.pkl")
 				train_data_points_ = pd.concat([train_data_points_, features], axis=0)
 				print(i,len(train_data_points_))
 				i += 1
-			train_data_points_.fillna(0, inplace=True)
-			if mode==0:
-				train_data_labels_ = self._get_labels()
-		if mode==0:
-			return (train_data_points_, train_data_labels_)
-		else:
-			return train_data_points_
+		train_data_points_.fillna(0, inplace=True)
+		train_data_labels_ = self._get_labels()
+		return (train_data_points_, train_data_labels_)
 
 	def _getPixelIntensity(self, filename):
 		f = open(self.samples_base_dir + filename)
@@ -123,6 +117,7 @@ class Preprocessing():
 		segments = defaultdict(int)
 
 		# Check if instrunction n-gram and segment size already there
+		print(os.path.isfile(self.feature_dump + filename + "_INSTRN_UNIGRAM.pkl"),filename)
 		if(os.path.isfile(self.feature_dump + filename + "_INSTRN_UNIGRAM.pkl")!=True):
 			with open(self.samples_base_dir + filename + ".asm", 'r', encoding='Latin-1') as file:
 				prev, now = 0, 0
@@ -208,6 +203,8 @@ class Preprocessing():
 		return p 
 
 	def _get_labels(self):
+		if(self.mode==1):
+			return None
 		trainLabels = pd.read_csv(self.trainingLabels, index_col=0)
 		trainLabels = trainLabels['Class']
 		trainLabels = trainLabels.loc[self.files]
@@ -217,44 +214,43 @@ class Preprocessing():
 		scaler = MinMaxScaler()
 		scaled_train_data_ = scaler.fit_transform(train_data_)
 		scaled_train_data_ = pd.DataFrame(scaled_train_data_, index = train_data_.index, columns = train_data_.columns)
-		# print(type(scaled_train_data_))
 		return scaled_train_data_
 
 
 def main():
 	print("Starting Experiment...")
 	print("Extracting Features...")
-	p = Preprocessing(int(sys.argv[1]))
+	p = Preprocessing(0)
 
-	X_train, y_train = p.get_processed_data()
+	X_train, y_train = p.get_processed_data(0)
 
-	# print("Feature extraction complete")
+	print("Feature extraction complete")
 
-	# print("Normalising...")
+	print("Normalising...")
 
-	# X_train = p.scaler(X_train)
+	X_train = p.scaler(X_train)
 
-	# print("Data points normalised")
+	print("Data points normalised")
 
-	# print("Training Classifiers...")
+	print("Training Classifiers...")
 
-	# models = SupervisedModels(X_train, y_train)
-	# models.train_all()
+	models = SupervisedModels(X_train, y_train)
+	models.train_all()
 
 
-	# # Create a pickle file for model
-	# joblib.dump(models,"finalModels.pkl")
+	# Create a pickle file for model
+	joblib.dump(models,"finalModels.pkl")
 
-	# print("Trained All Models")
+	print("Trained All Models")
 
-	# print("Average CV accuracy - Logistic Regression: ", models.lr.best_score_)
-	# print("Average CV accuracy - SVC: ", models.svc.best_score_)
-	# print("Average CV accuracy - Neural Network: ", models.nn.best_score_)
-	# print("Average CV accuracy - KNN: ", models.knn.best_score_)
-	# print("Average CV accuracy - XGBoost: ", models.xgbc.best_score_)
-	# print("Average CV accuracy - Random Forest: ", models.rfc.best_score_)
+	print("Average CV accuracy - Logistic Regression: ", models.lr.best_score_)
+	print("Average CV accuracy - SVC: ", models.svc.best_score_)
+	print("Average CV accuracy - Neural Network: ", models.nn.best_score_)
+	print("Average CV accuracy - KNN: ", models.knn.best_score_)
+	print("Average CV accuracy - XGBoost: ", models.xgbc.best_score_)
+	print("Average CV accuracy - Random Forest: ", models.rfc.best_score_)
 
-	# print('All Done!')
+	print('All Done!')
 
 
 if __name__ == "__main__":

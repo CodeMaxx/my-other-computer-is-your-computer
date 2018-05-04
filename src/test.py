@@ -27,6 +27,7 @@
 # Pandas for easier data representation
 import pandas as pd
 import numpy as np
+import sys
 
 # Reading and Writing pickle files
 from sklearn.externals import joblib
@@ -35,7 +36,7 @@ from train import SupervisedModels
 from preprocessing import Preprocessing
 
 # Predictor class for a predictor object
-class predictor():
+class Predictor():
 
 	# Loads the SupervisedModel file fr
 	def __init__(self,fileName):
@@ -44,39 +45,50 @@ class predictor():
 	def predict(self,testData,model):
 		return self.model.predict(testData)
 
+	def cprint(self, str):
+        print("\n" + "-"*25 + " " + str + " " + "-"*25 + "\n")
+
+	def checkAccuracy(self,X_test,model,labels)
+		predictions = self.predict(X_test,model)
+		correct = sum([predictions[i]==labels[i] for i in range(len(predictions))])
+		return correct*100/len(predictions)
 
 def main():
+	mode = int(sys.argv[1])
+	filename = int(sys.argv[2])
 	print("Starting Testing Experiment...")
 	print("Extracting Features from test Data...")
-	p = Preprocessing(test)
 
-	X_test = p.get_processed_data()
+	if mode==0:
+		p = Preprocessing(fileName)
+		X_test = p.get_processed_data(1)
+	else:
+		p = Preprocessing(1)
+		X_test = p.get_processed_data(0)
 
 	print("Feature extraction complete")
 
 	print("Normalising...")
 
-	X_train = p.scaler(X_train)
+	X_test = p.scaler(X_test)
 
 	print("Data points normalised")
 
-	print("Training Classifiers...")
+	predictors = Predictor("finalModels.pkl")
 
-	models = SupervisedModels(X_train, y_train)
-	models.train_all()
+	modelNames = ["Logistic Regression","SVC","Neural Network","KNN","XGBoost","Random Forest","Voting Classifier"]
+	models = ["lr","svc","nn","knn","xgbc","rf","vc"]
 
+	if mode==0:
+		predictions = [predictors.predict(X_test,model) for model in models]
+		modelWisePrediction = dict(zip(modelNames,predictions))
 
-	# Create a pickle file for model
-	joblib.dump(models,"finalModels.pkl")
-
-	print("Trained All Models")
-
-	print("Average CV accuracy - Logistic Regression: ", models.lr.best_score_)
-	print("Average CV accuracy - SVC: ", models.svc.best_score_)
-	print("Average CV accuracy - Neural Network: ", models.nn.best_score_)
-	print("Average CV accuracy - KNN: ", models.knn.best_score_)
-	print("Average CV accuracy - XGBoost: ", models.xgbc.best_score_)
-	print("Average CV accuracy - Random Forest: ", models.rfc.best_score_)
+	else:
+		file = open("../updatedTestLabels.csv",'r')
+		labels = [lines[0] for lines in [line.split(',') for line in file.readlines()[1:]]]
+		for i,model in models:
+			accuracy = predictors.checkAccuracy(X_test,model,labels)
+			print("Accuracy - "+modelNames[i]+" : ", accuracy)
 
 	print('All Done!')
 
