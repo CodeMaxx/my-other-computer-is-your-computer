@@ -87,7 +87,7 @@ class SupervisedModels():
         # Classifier
         _rfc = RandomForestClassifier(
             max_depth=20, random_state=3, n_estimators=100, n_jobs=-1)
-        rfc = GridSearchCV(_rfc, param_grid, cv=5, scoring='accuracy')
+        rfc = GridSearchCV(_rfc, param_grid, cv=4, scoring='accuracy')
 
         # Fitting data
         rfc.fit(self.raw_X, self.y)
@@ -95,7 +95,10 @@ class SupervisedModels():
         feature_scores = dict(
             zip(self.all_features, rfc.best_estimator_.feature_importances_))
         self.final_features = [feature for (feature,score) in feature_scores.items() if score > self.SCORE_IMPORTANCE_THRESHOLD]
-        self.X = self.raw_X[self.final_features]
+        # print(self.raw_X)
+        # print(self.final_features)
+        fi = np.array(self.final_features, dtype=object)
+        self.X = self.raw_X[fi]
         print(len(self.all_features),len(self.final_features))
         print("Feature Selection Complete")
 
@@ -123,7 +126,7 @@ class SupervisedModels():
 
         # Classifier
         _svc = SVC(random_state=42)
-        svc = GridSearchCV(_svc, param_grid, cv=5, scoring='accuracy')
+        svc = GridSearchCV(_svc, param_grid, cv=4, scoring='accuracy')
 
         # Fitting data
         svc.fit(self.X, self.y)
@@ -139,13 +142,13 @@ class SupervisedModels():
 
     def trainXGBC(self):
         print("Starting XGBoost Classifier training...")
-        max_depth = list(range(2,20))
-        learning_rate = list(range(1,10))
+        max_depth = list(range(5,15,2))
+        learning_rate = list(range(1,10,2))
         learning_rate = [x/10 for x in learning_rate]
         param_grid = dict(max_depth=max_depth,learning_rate=learning_rate)
 
         _xgbc = XGBClassifier(random_state=42)
-        xgbc = GridSearchCV(_xgbc, param_grid, cv=5, scoring='accuracy')
+        xgbc = GridSearchCV(_xgbc, param_grid, cv=4, scoring='accuracy')
 
         xgbc.fit(self.X, self.y)
         joblib.dump(xgbc, 'xgbc.pkl')
@@ -164,7 +167,7 @@ class SupervisedModels():
         param_grid = dict(C = C_vals)
 
         _lr = LogisticRegression(random_state=42)
-        lr = GridSearchCV(_lr, param_grid, cv=5, scoring='accuracy')
+        lr = GridSearchCV(_lr, param_grid, cv=4, scoring='accuracy')
 
         lr.fit(self.X, self.y)
         joblib.dump(lr, 'lr.pkl')
@@ -178,11 +181,11 @@ class SupervisedModels():
 
     def trainKNN(self):
         print("Starting KNN training...")
-        n_neighbors = list(range(1,20)) 
+        n_neighbors = list(range(1,20,2)) 
         param_grid = dict(n_neighbors = n_neighbors)
 
-        _knn = KNeighborsClassifier(random_state=42)
-        knn = GridSearchCV(_knn, param_grid, cv=5, scoring='accuracy')
+        _knn = KNeighborsClassifier()
+        knn = GridSearchCV(_knn, param_grid, cv=4, scoring='accuracy')
 
         knn.fit(self.X, self.y)
         joblib.dump(knn, 'knn.pkl')
@@ -204,7 +207,7 @@ class SupervisedModels():
         # Classifier
         _rfc = RandomForestClassifier(
             max_depth=20, random_state=3, n_estimators=100, n_jobs=-1)
-        rfc = GridSearchCV(_rfc, param_grid, cv=5, scoring='accuracy')
+        rfc = GridSearchCV(_rfc, param_grid, cv=4, scoring='accuracy')
 
         # Fitting data
         rfc.fit(self.X, self.y)
@@ -230,7 +233,7 @@ class SupervisedModels():
         # Classifier
         _nn = MLPClassifier(solver='lbfgs', alpha=1e-5,
                             hidden_layer_sizes=(64, 2), random_state=1)
-        nn = GridSearchCV(_nn, param_grid, cv=5, scoring='accuracy')
+        nn = GridSearchCV(_nn, param_grid, cv=4, scoring='accuracy')
 
         # Fitting data
         nn.fit(self.X, self.y)

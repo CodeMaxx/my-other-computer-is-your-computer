@@ -56,7 +56,7 @@ class Preprocessing():
 		if mode:
 			self.samples_base_dir = '../feature-dump/'
 			self.train_files = list(
-				set([i[:20] for i in os.listdir(self.samples_base_dir)]))[:100]
+				set([i[:20] for i in os.listdir(self.samples_base_dir)]))[:20]
 			self.feature_dump = "../feature-dump/"
 			self.trainingLabels = "../trainLabels.csv"
 		else:
