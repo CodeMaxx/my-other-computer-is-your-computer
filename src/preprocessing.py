@@ -68,7 +68,7 @@ class Preprocessing():
 
 
 	def get_processed_data(self):
-		i = 0 ;
+		i = 0
 		train_data_points_ = pd.DataFrame()
 		with concurrent.futures.ProcessPoolExecutor() as executor:
 			for features in executor.map(self._extract_features, self.train_files):

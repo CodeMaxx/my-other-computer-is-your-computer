@@ -59,10 +59,10 @@ class VotingClassifier():
 	# Function to predict 
 	def predict(self,testData):
 		predicted = [x.predict(testData) for x in self.listClassifiers]
-		predicted = [[predicted[i][j] for i in range(len(listClassifiers))] for j in range(len(testData))]
+		predicted = [[predicted[i][j] for i in range(len(self.listClassifiers))] for j in range(len(testData))]
 
 		# Getting counts of each predicted value 
-		valCountPair = [numpy.unique(a, return_counts=True) for a in predicted]
+		valCountPair = [np.unique(a, return_counts=True) for a in predicted]
 		counts = [dict(zip(x[0],x[1])) for x in valCountPair]
 
 		# Getting the majority prediction for each data point

@@ -44,9 +44,9 @@ def plot_RandomForest(rfc, min_samples_leaf_vals, max_leaf_nodes, SCORE_IMPORTAN
         plt.plot(max_leaf_nodes, scores[ind], label='min_samples_leaf: ' + str(i))
 
     # Get coordinates of best parameters
-    max_x = svc.best_params_['max_leaf_nodes']
-    max_min_samples_leaf = svc.best_params_['min_samples_leaf']
-    max_y = round(svc.best_score_, 3)
+    max_x = rfc.best_params_['max_leaf_nodes']
+    max_min_samples_leaf = rfc.best_params_['min_samples_leaf']
+    max_y = round(rfc.best_score_, 3)
 
     # Annotate best point on graph
     plt.annotate('Max at (%s, %s) at min_samples_leaf=%s' % (str(max_x), str(max_y), str(max_min_samples_leaf)), xy=(max_x, max_y),
@@ -62,11 +62,11 @@ def plot_KNN(knn, n_neighbors, SCORE_IMPORTANCE_THRESHOLD):
     # Hyperparameter values
     # min_samples_leaf_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     # Get all scored returned by GridSearchCV
-    scores = [x[1] for x in rfc.grid_scores_]
+    scores = [x[1] for x in knn.grid_scores_]
 
     # Get coordinates of best parameters
-    max_x = rfc.best_params_['n_neighbors']
-    max_y = round(rfc.best_score_, 3)
+    max_x = knn.best_params_['n_neighbors']
+    max_y = round(knn.best_score_, 3)
 
     # Annotate best point on graph
     plt.annotate('Max at (%s, %s)' % (str(max_x), str(max_y)), xy=(max_x, max_y), xytext=(max_x, max_y-0.01),
@@ -132,7 +132,7 @@ def plot_LogisticRegression(lr, C_vals, SCORE_IMPORTANCE_THRESHOLD):
 
 
 
-def plot_MLPClassifer(nn, hidden_layer_sizes_vals, max_iter_vals, SCORE_IMPORTANCE_THRESHOLD):
+def plot_MLPClassifier(nn, hidden_layer_sizes_vals, max_iter_vals, SCORE_IMPORTANCE_THRESHOLD):
     # Hyperparameter values
     # hidden_layer_sizes_vals = [
     #     (8, 4), (8, 8), (16, 8), (16, 16), (32, 16), (32, 32), (64, 64), (96, 96)]
