@@ -55,23 +55,25 @@ class Preprocessing():
 		self.mode = mode
 		if mode==0:
 			self.samples_base_dir = '../feature-dump/'
+			self.files = []
 			# self.train_files = list(
 			# 	set([i[:20] for i in os.listdir(self.samples_base_dir)]))[:20]
 			with open("../updatedTrainingLabels.csv") as file:
 				for line in file:
 					lines = line.split(',')
-					self.train_files.append(line[0])
+					self.files.append(line[0])
 			self.feature_dump = "../feature-dump/"
 			self.trainingLabels = "../trainLabels.csv"
 			self.targetFeatureDump = "../feature-dump-train/"
 		elif mode==1:
 			self.samples_base_dir = '../feature_dump/'
+			self.files = []
 			# self.test_files = list(
 			# 	set([i[:20] for i in os.listdir(self.samples_base_dir)]))[:2]
 			with open("../updatedTestLabels.csv") as file:
 				for line in file:
 					lines = line.split(',')
-					self.train_files.append(line[0])
+					self.files.append(line[0])
 			self.feature_dump = "../feature_dump/"
 			self.targetFeatureDump = "../feature-dump-test/"
 
@@ -81,7 +83,7 @@ class Preprocessing():
 		i = 0
 		train_data_points_ = pd.DataFrame()
 		with concurrent.futures.ProcessPoolExecutor() as executor:
-			for features in executor.map(self._extract_features, self.train_files):
+			for features in executor.map(self._extract_features, self.files):
 				train_data_points_ = pd.concat([train_data_points_, features], axis=0)
 				print(i,len(train_data_points_))
 				i += 1
@@ -204,7 +206,7 @@ class Preprocessing():
 	def _get_labels(self):
 		trainLabels = pd.read_csv(self.trainingLabels, index_col=0)
 		trainLabels = trainLabels['Class']
-		trainLabels = trainLabels.loc[self.train_files]
+		trainLabels = trainLabels.loc[self.files]
 		return trainLabels
 
 	def scaler(self, train_data_):
