@@ -56,7 +56,7 @@ class Preprocessing():
 		if mode:
 			self.samples_base_dir = '../feature-dump/'
 			self.train_files = list(
-				set([i[:20] for i in os.listdir(self.samples_base_dir)]))
+				set([i[:20] for i in os.listdir(self.samples_base_dir)]))[:50]
 			self.feature_dump = "../feature-dump/"
 			self.trainingLabels = "../trainLabels.csv"
 		else:
@@ -68,10 +68,13 @@ class Preprocessing():
 
 
 	def get_processed_data(self):
+		i = 0 ;
+		train_data_points_ = pd.DataFrame()
 		with concurrent.futures.ProcessPoolExecutor() as executor:
-			train_data_points_ = pd.DataFrame()
 			for features in executor.map(self._extract_features, self.train_files):
 				train_data_points_ = pd.concat([train_data_points_, features], axis=0)
+				print(i,len(train_data_points_))
+				i += 1
 			train_data_points_.fillna(0, inplace=True)
 			train_data_labels_ = self._get_labels()
 		return (train_data_points_, train_data_labels_)

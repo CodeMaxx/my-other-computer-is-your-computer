@@ -66,7 +66,7 @@ class VotingClassifier():
 		counts = [dict(zip(x[0],x[1])) for x in valCountPair]
 
 		# Getting the majority prediction for each data point
-		finalPrediction = [max(x,key=x.get) for x in counts]
+		finalPrediction = np.array([max(x,key=x.get) for x in counts])
 
 		return finalPrediction
 

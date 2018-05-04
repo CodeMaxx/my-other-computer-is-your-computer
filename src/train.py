@@ -71,11 +71,11 @@ class SupervisedModels():
     # train random forest classifier and choose important features based on score
     def feature_selection(self,SCORE_IMPORTANCE_THRESHOLD):
         self.SCORE_IMPORTANCE_THRESHOLD = SCORE_IMPORTANCE_THRESHOLD
-        self.feature_selection()
+        self.feature_selection_core()
 
 
     # train random forest classifier and choose important features based on score
-    def feature_selection(self):
+    def feature_selection_core(self):
         print("Started Random Forest Feature Selection...")
         min_samples_leaf_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         max_leaf_nodes = list(range(5,100,5))
