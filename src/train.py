@@ -68,6 +68,9 @@ class SupervisedModels():
         self.y = y                              # Training point labels
         self.SCORE_IMPORTANCE_THRESHOLD = 0.01
 
+    # Print helper function
+    def cprint(self, str):
+        print("\n" + "-"*25 + " " + str + " " + "-"*25 + "\n")
 
     # train random forest classifier and choose important features based on score
     def feature_selection(self,SCORE_IMPORTANCE_THRESHOLD):
@@ -77,7 +80,7 @@ class SupervisedModels():
 
     # train random forest classifier and choose important features based on score
     def feature_selection_core(self):
-        print("Started Random Forest Feature Selection...")
+        self.cprint("Started Random Forest Feature Selection...")
         # min_samples_leaf_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         # max_leaf_nodes = list(range(5,100,5))
         min_samples_leaf_vals = [1, 2, 3, 4]
@@ -91,16 +94,16 @@ class SupervisedModels():
 
         # Fitting data
         rfc.fit(self.raw_X, self.y)
-        # print(self.all_features, rfc.best_estimator_.feature_importances_)
+        # self.cprint(self.all_features, rfc.best_estimator_.feature_importances_)
         feature_scores = dict(
             zip(self.all_features, rfc.best_estimator_.feature_importances_))
         self.final_features = [feature for (feature,score) in feature_scores.items() if score > self.SCORE_IMPORTANCE_THRESHOLD]
-        # print(self.raw_X)
-        # print(self.final_features)
+        # self.cprint(self.raw_X)
+        # self.cprint(self.final_features)
         fi = np.array(self.final_features, dtype=object)
         self.X = self.raw_X[fi]
         print(len(self.all_features),len(self.final_features))
-        print("Feature Selection Complete")
+        self.cprint("Feature Selection Complete")
 
 
     def train_all(self):
@@ -118,7 +121,7 @@ class SupervisedModels():
 
     def trainSVC(self):
         # Hyperparameter values
-        print("SVC training started...")
+        self.cprint("SVC training started...")
         C_vals = [0.01, 0.1, 1, 10, 100, 1000, 10000]
         gamma_vals = [0.001, 0.01, 0.1, 1]
 
@@ -135,13 +138,13 @@ class SupervisedModels():
 
         self.svc = svc
 
-        print("SVC trained!")
+        self.cprint("SVC trained!")
 
         # Hyper parameter plot 
         plot_SVC(self.svc, C_vals, gamma_vals, self.SCORE_IMPORTANCE_THRESHOLD)
 
     def trainXGBC(self):
-        print("Starting XGBoost Classifier training...")
+        self.cprint("Starting XGBoost Classifier training...")
         max_depth = list(range(5,15,2))
         learning_rate = list(range(1,10,2))
         learning_rate = [x/10 for x in learning_rate]
@@ -155,14 +158,14 @@ class SupervisedModels():
 
         self.xgbc = xgbc
 
-        print("XGBoost Classifier trained!")
+        self.cprint("XGBoost Classifier trained!")
 
          # Hyper parameter plot 
         plot_XGBC(self.xgbc, max_depth, learning_rate, self.SCORE_IMPORTANCE_THRESHOLD)
 
 
     def trainLogisticRegression(self):
-        print("Starting Logistic Regression...")
+        self.cprint("Starting Logistic Regression...")
         C_vals = [0.01, 0.1, 1, 10, 100, 1000, 10000]
         param_grid = dict(C = C_vals)
 
@@ -173,15 +176,15 @@ class SupervisedModels():
         joblib.dump(lr, 'lr.pkl')
 
         self.lr = lr
-        print("LR Classifer trained!")
+        self.cprint("LR Classifer trained!")
 
          # Hyper parameter plot 
         plot_LogisticRegression(self.lr, C_vals, self.SCORE_IMPORTANCE_THRESHOLD)
 
 
     def trainKNN(self):
-        print("Starting KNN training...")
-        n_neighbors = list(range(1,20,2)) 
+        self.cprint("Starting KNN training...")
+        n_neighbors = list(range(1,10,2)) 
         param_grid = dict(n_neighbors = n_neighbors)
 
         _knn = KNeighborsClassifier()
@@ -191,14 +194,14 @@ class SupervisedModels():
         joblib.dump(knn, 'knn.pkl')
 
         self.knn = knn
-        print("KNN Classifer trained!")
+        self.cprint("KNN Classifer trained!")
 
          # Hyper parameter plot 
         plot_KNN(self.knn, n_neighbors, self.SCORE_IMPORTANCE_THRESHOLD)
 
 
     def train_RandomForest(self):
-        print("Starting Random Forest training...")
+        self.cprint("Starting Random Forest training...")
         # Hyperparameter values
         min_samples_leaf_vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         max_leaf_nodes = list(range(5,100,5))
@@ -215,13 +218,13 @@ class SupervisedModels():
         joblib.dump(rfc, 'random_forest.pkl')
 
         self.rfc = rfc
-        print("Random Forest Classifier trained!")
+        self.cprint("Random Forest Classifier trained!")
 
         # Plot for hyper parameter tuning for give threshold
         plot_RandomForest(self.rfc, min_samples_leaf_vals,  max_leaf_nodes, self.SCORE_IMPORTANCE_THRESHOLD)
     
     def trainNeuralNetwork(self):
-        print("Starting Neural Network training...")
+        self.cprint("Starting Neural Network training...")
         # Hyperparameter values
         hidden_layer_sizes_vals = [
             (8, 4), (8, 8), (16, 8), (16, 16), (32, 16), (32, 32), (64, 64), (96, 96)]
@@ -240,20 +243,20 @@ class SupervisedModels():
         # Create pickle file for model
         joblib.dump(nn, 'neural_network.pkl')
         self.nn = nn
-        print("Neural Network trained!")
+        self.cprint("Neural Network trained!")
 
         # Plot for hyper parameter tuning for give threshold
         plot_MLPClassifier(self.nn, hidden_layer_sizes_vals, max_iter_vals, self.SCORE_IMPORTANCE_THRESHOLD)
 
     def trainVotingClassifier(self):
-        print("Starting Voting Classifier...")
+        self.cprint("Starting Voting Classifier...")
 
         # Initialising Voting Classifier
         VC = VotingClassifier([self.svc,self.xgbc,self.lr,self.knn,self.rfc,self.nn])
         self.VC = VC
         # Create pickle file for model
         joblib.dump(self.VC, 'voting_classifier.pkl')
-        print("Voting Classifier trained!")
+        self.cprint("Voting Classifier trained!")
  
 
 
