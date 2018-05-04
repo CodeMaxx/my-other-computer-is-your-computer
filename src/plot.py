@@ -23,6 +23,11 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 
+
+# Pandas for easier data representation
+import pandas as pd
+import numpy as np
+
 # Plotting Graphs
 import matplotlib.pyplot as plt
 

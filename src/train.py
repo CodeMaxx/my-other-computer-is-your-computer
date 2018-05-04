@@ -53,8 +53,8 @@ from sklearn.neural_network import MLPClassifier
 # Grid search cross-validation for tuning hyperparameters
 from sklearn.model_selection import GridSearchCV
 
-import plot
-import voting
+from plot import *
+from voting import VotingClassifier
 
 ########################################################################
 
@@ -243,10 +243,9 @@ class SupervisedModels():
         print("Starting Voting Classifier...")
 
         # Initialising Voting Classifier
-        self.VC = voting.VotingClassifier([self.svc,self.xgbc,self.lr,self.knn,self.rfc,self.nn])
+        VC = voting.VotingClassifier([self.svc,self.xgbc,self.lr,self.knn,self.rfc,self.nn])
         # Create pickle file for model
-        joblib.dump(nn, 'voting_classifier.pkl')
-        self.nn = nn
+        joblib.dump(self.VC, 'voting_classifier.pkl')
         print("Voting Classifier trained!")
  
 
