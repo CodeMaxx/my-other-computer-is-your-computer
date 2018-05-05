@@ -127,7 +127,7 @@ class SupervisedModels():
         # for SCORE_IMPORTANCE_THRESHOLD in list(range(10))/20:
         # self.feature_selection(SCORE_IMPORTANCE_THRESHOLD)
         # print(self.raw_X)
-        self.feature_selection(0.0001)
+        self.feature_selection(0.001)
         self.trainSVC()
         self.trainXGBC()
         self.trainLogisticRegression()

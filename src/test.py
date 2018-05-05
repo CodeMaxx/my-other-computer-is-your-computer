@@ -75,13 +75,13 @@ class Predictor():
 def main():
 	mode = int(sys.argv[1])
 	if(mode==1):
-		filename = int(sys.argv[2])
+		fileName = str(sys.argv[2])
 	print("Starting Testing Experiment...")
 	print("Extracting Features from test Data...")
 
 	if mode==1:
 		p = Preprocessing(fileName)
-		X_test = p.get_processed_data(1)
+		X_test,_ = p.get_processed_data(1)
 	else:
 		p = Preprocessing(1)
 		X_test, y_test = p.get_processed_data(0)
@@ -117,12 +117,12 @@ def main():
 	print("Data points normalised")
 
 	modelNames = ["Logistic Regression","SVC","Neural Network","KNN","XGBoost","Random Forest","Voting Classifier"]
-	models = ["lr","svc","nn","knn","xgbc","rfc","vc"]
+	models = [predictor.Models.lr,predictor.Models.svc,predictor.Models.nn,predictor.Models.knn,predictor.Models.xgbc,predictor.Models.rfc,predictor.Models.vc]
 
 	if mode==1:
 		predictions = [predictor.predict(X_test,model) for model in models]
 		modelWisePrediction = dict(zip(modelNames,predictions))
-
+		print(modelWisePrediction)
 	else:
 		for i,model in enumerate(models):
 			accuracy = predictor.checkAccuracy(X_test,model,p.actualLabels)

@@ -59,13 +59,13 @@ class Preprocessing():
 			file = open("../updatedTrainingLabels.csv",'r')
 			self.files = [lines[0] for lines in [line.split(',') for line in file.readlines()[1:]]]
 			random.shuffle(self.files)
-			self.files = self.files[:1000]
+			self.files = self.files[:2000]
 			self.feature_dump = "../feature-dump/"
 			self.trainingLabels = "../trainLabels.csv"
 			self.targetFeatureDump = "../all-feature-dump-train/"
 		elif mode==1:
 			self.samples_base_dir = '../feature_dump/'
-			file = open("../sampleTestLabels.csv",'r')
+			file = open("../updatedTestLabels.csv",'r')
 			file = [line.split(',') for line in file.readlines()[1:]]
 			self.files = [lines[0] for lines in file]
 			self.actualLabels = [int(lines[1]) for lines in file]
@@ -210,7 +210,7 @@ class Preprocessing():
 		return p 
 
 	def _get_labels(self):
-		if(self.mode==1):
+		if(self.mode!=0):
 			return None
 		trainLabels = pd.read_csv(self.trainingLabels, index_col=0)
 		trainLabels = trainLabels['Class']
