@@ -14,7 +14,7 @@ The git repository has the following directories -
 8. **new-files-all-feature-dump** - _this contains the pickle file for all features_
 
 ### Training
-The training is done by running the command `python3 preprocessing.py` in the `src/` directory from the terminal. After training the trained models are stored as pickle files in the `src/` folder by their respective names. The finalModel, an object of class SupervisedModels is stored as the file `finalModels.pkl' which contains the information about scalers, features and underlying trained classifiers_
+The training is done by running the command `python3 preprocessing.py` in the `src/` directory from the terminal. After training the trained models are stored as pickle files in the `src/` folder by their respective names. The finalModel, an object of class SupervisedModels is stored as the file `finalModels.pkl' which contains the information about scalers, features and underlying trained classifiers
 
 ### Testing 
 Testing can be done in 2 ways -
