@@ -1,4 +1,9 @@
 # my-other-computer-is-your-computer
+
+This project emerged for fulfilling a requirement of the Machine Learning course (EE 769) I took in Spring 2018 at IIT Bombay.
+
+The detailed report for the project is available at my blog [here](https://www.akashtrehan.com/my-other-computer-is-your-computer/).
+
 Microsoft Malware Classification Challenge
 
 ### Directory Structure
